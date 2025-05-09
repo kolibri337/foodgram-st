@@ -24,6 +24,8 @@ INSTALLED_APPS = [
     'api.apps.ApiConfig',
     # Регистрируем приложение recipes
     'recipes.apps.RecipesConfig',
+    # Регистрируем приложение users
+    'users.apps.UsersConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
