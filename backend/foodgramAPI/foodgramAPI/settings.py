@@ -9,7 +9,8 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 #Загружаем значения переменных окружения
-load_dotenv()
+ENV_PATH = BASE_DIR / '.env'
+load_dotenv(dotenv_path=ENV_PATH)
 
 # Получим список разрешённых хостов
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
@@ -128,7 +129,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, "media")
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
@@ -136,30 +137,31 @@ STATIC_ROOT = os.path.join(BASE_DIR, "media")
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Модель для auth
-AUTH_USER_MODEL = "recipes.User"
+AUTH_USER_MODEL = 'users.CustomUser'
 
-# Настроим аутентификацию по токену
+# Настроим REST framework
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.TokenAuthentication",
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
     ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 6,
 }
 
 # Настройки djoser
 DJOSER = {
-    # Основные настройки
-    "LOGIN_FIELD": "email",
-    "HIDE_USERS": False,
-
-    # Сериализаторы
-    "SERIALIZERS": {
-        "user": "api.serializers.users.UserProfileSerializer",
-        "current_user": "api.serializers.users.UserProfileSerializer",
+    'LOGIN_FIELD': 'email',
+    'HIDE_USERS': False,
+    'SERIALIZERS': {
+        'user': 'api.serializers.users.UserProfileSerializer',
+        'current_user': 'api.serializers.users.UserProfileSerializer',
+        'user_create': 'users.serializers.UserCreateSerializer',
     },
-
-    # Права доступа
-    "PERMISSIONS": {
-        "user": ["rest_framework.permissions.IsAuthenticated"],
-        "user_list": ["rest_framework.permissions.AllowAny"],
+    'PERMISSIONS': {
+        'user': ['rest_framework.permissions.IsAuthenticated'],
+        'user_list': ['rest_framework.permissions.AllowAny'],
     },
 }
