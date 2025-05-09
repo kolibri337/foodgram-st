@@ -1,11 +1,13 @@
-version: '3.3'
-services:
+version: "3.8"
 
+services:
   frontend:
     container_name: foodgram-front
     build: ../frontend
     volumes:
       - ../frontend/:/app/result_build/
+    networks:
+      - foodgram_net
   nginx:
     container_name: foodgram-proxy
     image: nginx:1.25.4-alpine
@@ -15,3 +17,64 @@ services:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - ../frontend/build:/usr/share/nginx/html/
       - ../docs/:/usr/share/nginx/html/api/docs/
+      - mediavol:/var/html/media/
+      - staticvol:/var/html/static/
+
+  # API
+  backend:
+    container_name: foodgram-backend
+    build:
+      context: ../backend/
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DEBUG: ${DEBUG}
+      SECRET_KEY: ${SECR_KEY}
+      DB_PORT: ${DatBas_PORT}
+      DB_HOST: ${DastBas_HOST}
+      DB_NAME: ${DatBas_NAME}
+      DB_USER: ${DatBas_USER}
+      DB_PASSWORD: ${DatBas_PASSWORD}
+    restart: always
+    ports:
+      - 8000:8000
+    networks:
+      - foodgram_network
+    volumes:
+      - media_volume:/app/media/
+      - static_volume:/app/static/
+
+   # база данных для рецептов
+  db:
+    container_name: foodgram-recipe-app
+    image: 16-alpine 
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - foodgram_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+
+networks:
+  foodgram_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.100.0/24
+
+volumes:
+  postgres-data:
+  mediavol:
+  staticvol:
