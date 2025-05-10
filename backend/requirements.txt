@@ -1,6 +1,7 @@
 asgiref==3.8.1
 asttokens==3.0.0
 attrs==25.3.0
+autopep8==2.3.2
 backcall==0.2.0
 beautifulsoup4==4.13.4
 bleach==6.2.0
@@ -43,10 +44,12 @@ platformdirs==4.3.8
 prompt_toolkit==3.0.51
 ptyprocess==0.7.0
 pure_eval==0.2.3
+pycodestyle==2.13.0
 pycparser==2.22
 Pygments==2.19.1
 PyJWT==2.9.0
 python-dateutil==2.9.0.post0
+python-dotenv==1.1.0
 python3-openid==3.2.0
 pytz==2025.2
 pyzmq==26.4.0
