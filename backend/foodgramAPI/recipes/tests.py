@@ -13,7 +13,7 @@ class RecipeAPITestCase(APITestCase):
             username="testuser", password="password"
         )
 
-        # Создаем ингредиенты (используем первый из предоставленных)
+        # Создаем ингредиенты
         self.ingredient1 = Ingredient.objects.create(
             name="абрикосовое варенье",
             measurement_unit="г"
@@ -77,7 +77,8 @@ class RecipeAPITestCase(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(
-            ShoppingCartRecipe.objects.filter(user=self.user, recipe=self.recipe)
+            ShoppingCartRecipe.objects.filter(
+                user=self.user, recipe=self.recipe)
             .exists()
         )
 
@@ -87,9 +88,10 @@ class RecipeAPITestCase(APITestCase):
         response = self.client.delete(
             f"/api/recipes/{self.recipe.id}/remove-from-shopping-cart/"
         )
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT) 
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(
-            ShoppingCartRecipe.objects.filter(user=self.user, recipe=self.recipe)
+            ShoppingCartRecipe.objects.filter(
+                user=self.user, recipe=self.recipe)
             .exists()
         )
 

@@ -12,15 +12,15 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 # Локальные импорты
-from .filters import RecipeFilter, IngredientFilter
+from .filters import RecipeFilter
 from .models import Recipe, Ingredient, FavoriteRecipe, ShoppingCartRecipe
 from .paginations import RecipePaginator
 from .serializers import (
     IngredientSerializer,
-    RecipeDetailSerializer,
-    RecipeCreateSerializer,
+    RecipeReadSerializer,
+    RecipeWriteSerializer,
     FavoriteRecipeSerializer,
-    ShoppingCartSerializer
+    ShoppingCartRecipeSerializer
 )
 
 
@@ -46,8 +46,8 @@ class RecipesViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         if self.action in ('create', 'update', 'partial_update'):
-            return RecipeCreateSerializer
-        return RecipeDetailSerializer
+            return RecipeWriteSerializer
+        return RecipeReadSerializer
 
     def get_permissions(self):
         if self.action in [
@@ -96,11 +96,12 @@ class RecipesViewSet(viewsets.ModelViewSet):
         elif is_favorited == '0':
             queryset = queryset.exclude(favorites__user=user)
 
-        is_in_shopping_cart = self.request.query_params.get('is_in_shopping_cart')
+        is_in_shopping_cart = self.request.query_params.get(
+            'is_in_shopping_cart')
         if is_in_shopping_cart == '1':
-            queryset = queryset.filter(shopping_carts__user=user)
+            queryset = queryset.filter(shopping_cart__user=user)
         elif is_in_shopping_cart == '0':
-            queryset = queryset.exclude(shopping_carts__user=user)
+            queryset = queryset.exclude(shopping_cart__user=user)
 
         return queryset
 
@@ -112,7 +113,8 @@ class RecipesViewSet(viewsets.ModelViewSet):
         recipe = self.get_object()
         short_code = ''.join(
             [c for c in recipe.name if c.isalnum()])[:6] or 'default'
-        return Response({'short-link': f'https://foodgram.ru/s/ {short_code}'}, status=HTTPStatus.OK)
+        return Response(
+            {'short-link': f'https://foodgram.ru/s/ {short_code}'}, status=HTTPStatus.OK)
 
     @action(detail=True, methods=['post'], url_path='add-to-favorites')
     def add_to_favorites(self, request, pk=None):
@@ -121,7 +123,8 @@ class RecipesViewSet(viewsets.ModelViewSet):
         """
         recipe = get_object_or_404(Recipe, id=pk)
         data = {'user': request.user.id, 'recipe': recipe.id}
-        serializer = FavoriteRecipeSerializer(data=data, context={'request': request})
+        serializer = FavoriteRecipeSerializer(
+            data=data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=HTTPStatus.CREATED)
@@ -132,7 +135,8 @@ class RecipesViewSet(viewsets.ModelViewSet):
         Удалить рецепт из избранного
         """
         recipe = get_object_or_404(Recipe, id=pk)
-        deleted, _ = FavoriteRecipe.objects.filter(user=request.user, recipe=recipe).delete()
+        deleted, _ = FavoriteRecipe.objects.filter(
+            user=request.user, recipe=recipe).delete()
         if deleted == 0:
             return Response(
                 {"detail": "Рецепт не найден в избранном"},
@@ -147,12 +151,14 @@ class RecipesViewSet(viewsets.ModelViewSet):
         """
         recipe = get_object_or_404(Recipe, id=pk)
         data = {'user': request.user.id, 'recipe': recipe.id}
-        serializer = ShoppingCartSerializer(data=data, context={'request': request})
+        serializer = ShoppingCartRecipeSerializer(
+            data=data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=HTTPStatus.CREATED)
 
-    @action(detail=True, methods=['delete'], url_path='remove-from-shopping-cart')
+    @action(detail=True, methods=['delete'],
+            url_path='remove-from-shopping-cart')
     def remove_from_shopping_cart(self, request, pk=None):
         """
         Удалить рецепт из списка покупок
@@ -179,7 +185,8 @@ class RecipesViewSet(viewsets.ModelViewSet):
                 status=HTTPStatus.UNAUTHORIZED
             )
 
-        cart_items = ShoppingCartRecipe.objects.filter(user=request.user).select_related('recipe')
+        cart_items = ShoppingCartRecipe.objects.filter(
+            user=request.user).prefetch_related('recipe__recipe_ingredients')
         if not cart_items.exists():
             return Response(
                 {"error": "Ваш список покупок пуст"},
@@ -188,17 +195,17 @@ class RecipesViewSet(viewsets.ModelViewSet):
 
         ingredients_map = defaultdict(int)
         for item in cart_items:
-            recipe_ingredients = item.recipe.recipe_ingredients.all()
-            for ri in recipe_ingredients:
+            for ri in item.recipe.recipe_ingredients.all():
                 key = (ri.ingredient.name, ri.ingredient.measurement_unit)
                 ingredients_map[key] += ri.amount
 
-        # Формирование содержимого файла
         content = ["Список покупок:\n"]
         for (name, unit), amount in ingredients_map.items():
             content.append(f"{name} ({unit}) — {amount}")
 
         filename = "shopping_list.txt"
-        response = FileResponse("\n".join(content), as_attachment=True, filename=filename)
+        response = FileResponse(
+            "\n".join(content),
+            as_attachment=True,
+            filename=filename)
         return response
-    

@@ -24,6 +24,27 @@ from .pagination import AccountPagination
 
 logger = logging.getLogger(__name__)
 
+
+class TokenAuthView(viewsets.ViewSet):
+    """Управление токенами аутентификации"""
+
+    @action(detail=False, methods=['post'])
+    def login(self, request):
+        """Получение токена аутентификации"""
+        serializer = UserAuthSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        token, _ = Token.objects.get_or_create(
+            user=serializer.validated_data['user'])
+        return Response({'auth_token': token.key})
+
+    @action(detail=False, methods=['post'],
+            permission_classes=[IsAuthenticated])
+    def logout(self, request):
+        """Удаление токена аутентификации"""
+        Token.objects.filter(user=request.user).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 class UserAccountViewSet(viewsets.ModelViewSet):
     """Контроллер для управления пользовательскими аккаунтами"""
     queryset = CustomUser.objects.all().order_by('-date_joined')
@@ -34,13 +55,15 @@ class UserAccountViewSet(viewsets.ModelViewSet):
         """Выбор сериализатора в зависимости от действия"""
         return UserCreateSerializer if self.action == 'create' else super().get_serializer_class()
 
-    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=['get'],
+            permission_classes=[IsAuthenticated])
     def current_user(self, request):
         """Получение данных текущего пользователя"""
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
 
-    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=['post'],
+            permission_classes=[IsAuthenticated])
     def change_password(self, request):
         """Изменение пароля пользователя"""
         user = request.user
@@ -63,7 +86,8 @@ class UserAccountViewSet(viewsets.ModelViewSet):
         user.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=False, methods=['put', 'delete'], permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=['put', 'delete'],
+            permission_classes=[IsAuthenticated])
     def profile_image(self, request):
         """Управление аватаром пользователя"""
         if request.method == 'PUT':
@@ -78,7 +102,7 @@ class UserAccountViewSet(viewsets.ModelViewSet):
                 format, imgstr = image_data.split(';base64,')
                 ext = format.split('/')[-1]
                 filename = f'{uuid.uuid4()}.{ext}'
-                
+
                 request.user.avatar.save(
                     filename,
                     ContentFile(base64.b64decode(imgstr)),
@@ -94,7 +118,7 @@ class UserAccountViewSet(viewsets.ModelViewSet):
                     {'detail': 'Ошибка обработки изображения'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-        
+
         # DELETE обработка
         if not request.user.avatar:
             return Response(
@@ -104,13 +128,15 @@ class UserAccountViewSet(viewsets.ModelViewSet):
         request.user.avatar.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True, methods=['post', 'delete'], permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=['post', 'delete'],
+            permission_classes=[IsAuthenticated])
     def follow(self, request, pk=None):
         """Управление подписками на пользователей"""
         target_user = self.get_object()
 
         if request.method == 'POST':
-            if Subscription.objects.filter(subscriber=request.user, author=target_user).exists():
+            if Subscription.objects.filter(
+                    subscriber=request.user, author=target_user).exists():
                 return Response(
                     {'detail': 'Вы уже подписаны на этого пользователя'},
                     status=status.HTTP_400_BAD_REQUEST
@@ -140,7 +166,8 @@ class UserAccountViewSet(viewsets.ModelViewSet):
         ).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=['get'],
+            permission_classes=[IsAuthenticated])
     def following(self, request):
         """Получение списка подписок"""
         following_users = CustomUser.objects.filter(
@@ -171,22 +198,5 @@ class UserAccountViewSet(viewsets.ModelViewSet):
             ]
             response_data.append(user_data)
 
-        return self.get_paginated_response(response_data) if page else Response(response_data)
-
-
-class TokenAuthView(viewsets.ViewSet):
-    """Управление токенами аутентификации"""
-
-    @action(detail=False, methods=['post'])
-    def login(self, request):
-        """Получение токена аутентификации"""
-        serializer = UserAuthSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        token, _ = Token.objects.get_or_create(user=serializer.validated_data['user'])
-        return Response({'auth_token': token.key})
-
-    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
-    def logout(self, request):
-        """Удаление токена аутентификации"""
-        Token.objects.filter(user=request.user).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return self.get_paginated_response(
+            response_data) if page else Response(response_data)

@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-#Для задания секретного ключа на случай, если он не указан в .env
+# Для задания секретного ключа на случай, если он не указан в .env
 from django.core.management.utils import get_random_secret_key
 # Для загрузки переменных окружения функция и соответствующего пакета
 from dotenv import load_dotenv
@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-#Загружаем значения переменных окружения
+# Загружаем значения переменных окружения
 ENV_PATH = BASE_DIR / '.env'
 load_dotenv(dotenv_path=ENV_PATH)
 

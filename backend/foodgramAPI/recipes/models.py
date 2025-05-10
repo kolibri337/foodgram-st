@@ -2,7 +2,6 @@ from django.db import models
 from django.core.validators import MinValueValidator
 from django.contrib.auth import get_user_model
 
-
 User = get_user_model()
 
 
@@ -17,7 +16,7 @@ class Ingredient(models.Model):
     measurement_unit = models.CharField(
         max_length=64,
         verbose_name='Единица измерения',
-        help_text='Укажите единицу измерения (например, граммы)',
+        help_text='Укажите единицу измерения (например, мл)',
     )
 
     class Meta:

@@ -7,6 +7,7 @@ from django.contrib.auth.password_validation import validate_password
 from .models import CustomUser, Subscription
 from utils.validators import validate_user_identifier as validate_username
 
+
 class UserAuthSerializer(serializers.Serializer):
     """Сериализатор для аутентификации"""
     email = serializers.EmailField()
@@ -24,6 +25,7 @@ class UserAuthSerializer(serializers.Serializer):
         data['user'] = user
         return data
 
+
 class UserSerializer(serializers.ModelSerializer):
     """Основной сериализатор пользователя"""
     is_subscribed = serializers.SerializerMethodField()
@@ -39,10 +41,11 @@ class UserSerializer(serializers.ModelSerializer):
     def get_is_subscribed(self, obj):
         request = self.context.get('request')
         return (
-            request and
-            request.user.is_authenticated and
-            obj.subscribers.filter(subscriber=request.user).exists()
+            request
+            and request.user.is_authenticated
+            and obj.subscribers.filter(subscriber=request.user).exists()
         )
+
 
 class UserCreateSerializer(serializers.ModelSerializer):
     """Сериализатор для регистрации"""
@@ -50,7 +53,13 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['id', 'email', 'username', 'password', 'first_name', 'last_name']
+        fields = [
+            'id',
+            'email',
+            'username',
+            'password',
+            'first_name',
+            'last_name']
 
     def validate_email(self, value):
         if CustomUser.objects.filter(email__iexact=value).exists():
@@ -65,6 +74,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return CustomUser.objects.create_user(**validated_data)
+
 
 class SubscriptionSerializer(serializers.ModelSerializer):
     """Сериализатор подписок"""
@@ -83,8 +93,8 @@ class SubscriptionSerializer(serializers.ModelSerializer):
             'is_subscribed', 'recipes_count'
         ]
 
-    def get_is_subscribed(self, obj):
-        return True
-
     def get_recipes_count(self, obj):
         return obj.author.recipes.count()
+
+    def get_is_subscribed(self, obj):
+        return True

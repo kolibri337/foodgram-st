@@ -9,7 +9,7 @@ base_urlpatterns = [
     path("api/", include("api.urls", namespace="api")),
     # Основные URL рецептов
     path("", include("recipes.urls", namespace="recipes")),
-     # Админ-панель Django
+    # Админ-панель Django
     path("admin/", admin.site.urls),
 ]
 

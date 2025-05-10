@@ -4,9 +4,10 @@ from django.core.validators import RegexValidator
 from django.utils import timezone
 from .managers import AccountManager
 
+
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     """Кастомная модель пользователя с email в качестве идентификатора"""
-    
+
     email = models.EmailField(
         'Электронная почта',
         max_length=254,
@@ -30,22 +31,23 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     )
     first_name = models.CharField('Имя', max_length=150, blank=True)
     last_name = models.CharField('Фамилия', max_length=150, blank=True)
-    date_joined = models.DateTimeField('Дата регистрации', default=timezone.now)
+    date_joined = models.DateTimeField(
+        'Дата регистрации', default=timezone.now)
     is_active = models.BooleanField('Активный', default=True)
     is_staff = models.BooleanField('Персонал', default=False)
-    
+
     avatar = models.ImageField(
         'Аватар',
         upload_to='users/avatars/%Y/%m/%d/',
         blank=True,
         null=True,
     )
-    
+
     objects = AccountManager()
-    
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
-    
+
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
@@ -56,13 +58,13 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
                 name='unique_auth'
             )
         ]
-    
+
     def __str__(self):
         return self.username
-    
+
     def get_full_name(self):
         return f'{self.first_name} {self.last_name}'.strip()
-    
+
     def clean(self):
         super().clean()
         if self.username.lower() == 'me':
@@ -71,7 +73,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 class Subscription(models.Model):
     """Модель подписки пользователей друг на друга"""
-    
+
     subscriber = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
@@ -88,7 +90,7 @@ class Subscription(models.Model):
         'Дата подписки',
         auto_now_add=True
     )
-    
+
     class Meta:
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
@@ -102,6 +104,6 @@ class Subscription(models.Model):
                 name='prevent_self_subscription'
             )
         ]
-    
+
     def __str__(self):
         return f'{self.subscriber} -> {self.author}'
