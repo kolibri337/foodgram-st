@@ -1,9 +1,9 @@
 from rest_framework import serializers
 from django.db import transaction
 from django.core.exceptions import ValidationError as DjangoValidationError
-from ..models import Ingredient, Recipe, RecipeIngredient, FavoriteRecipe, ShoppingCartRecipe
+from recipes.models import Ingredient, Recipe, RecipeIngredient, FavoriteRecipe, ShoppingCartRecipe
 from users.serializers import UserSerializer
-from ..fields import ImageDataField
+from .fields import ImageDataField
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -145,9 +145,15 @@ class RecipeReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = (
-            'id', 'author', 'name', 'image', 'text',
-            'cooking_time', 'is_favorite', 'is_in_shopping_cart', 'recipe_ingredients'
-        )
+            'id',
+            'author',
+            'name',
+            'image',
+            'text',
+            'cooking_time',
+            'is_favorite',
+            'is_in_shopping_cart',
+            'recipe_ingredients')
 
     def get_is_favorite(self, obj):
         user = self.context.get('request').user

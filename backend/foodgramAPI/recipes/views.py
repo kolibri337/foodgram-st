@@ -12,7 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 # Локальные импорты
-from .filters import RecipeFilter
+from .filters import RecipeFilter, IngredientFilter
 from .models import Recipe, Ingredient, FavoriteRecipe, ShoppingCartRecipe
 from .paginations import RecipePaginator
 from .serializers import (

@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 
 from .models import CustomUser, Subscription
-from utils.validators import validate_user_identifier as validate_username
+from .utils.validators import validate_user_identifier as validate_username
 
 
 class UserAuthSerializer(serializers.Serializer):

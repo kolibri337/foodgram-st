@@ -83,8 +83,8 @@ DATABASES = {
         "HOST": os.getenv("DB_HOST", "localhost"),
         "PORT": os.getenv("DB_PORT", "5432"),
         "NAME": os.getenv("DB_NAME", "foodgramdb"),
-        "USER": os.getenv("DB_USER", "postgres"),
-        "PASSWORD": os.getenv("DB_PASS", "foodgram"),
+        "USER": os.getenv("DB_USER", "myuser"),
+        "PASSWORD": os.getenv("DB_PASS", "safepass"),
     }
 }
 
@@ -156,8 +156,8 @@ DJOSER = {
     'LOGIN_FIELD': 'email',
     'HIDE_USERS': False,
     'SERIALIZERS': {
-        'user': 'api.serializers.users.UserProfileSerializer',
-        'current_user': 'api.serializers.users.UserProfileSerializer',
+        'user': 'users.serializers.UserSerializer',
+        'current_user': 'users.serializers.UserSerializer',
         'user_create': 'users.serializers.UserCreateSerializer',
     },
     'PERMISSIONS': {

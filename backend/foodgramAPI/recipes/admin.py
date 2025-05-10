@@ -28,8 +28,6 @@ class IngredientAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "measurement_unit")
     search_fields = ("name",)
     ordering = ("name",)
-    # Для автозаполнения в RecipeIngredientInline
-    autocomplete_fields = ['name']
 
 
 class RecipeIngredientInline(admin.TabularInline):

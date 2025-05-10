@@ -1,6 +1,6 @@
 from django_filters import rest_framework as filters
 from django.db.models import Exists, OuterRef
-from .models import Recipe, FavoriteRecipe, ShoppingCartRecipe
+from .models import Recipe, Ingredient, FavoriteRecipe, ShoppingCartRecipe
 
 
 class RecipeFilter(filters.FilterSet):
@@ -35,3 +35,13 @@ class RecipeFilter(filters.FilterSet):
         if user.is_authenticated and value:
             return queryset.filter(shopping_cart_recipes__user=user)
         return queryset
+
+
+class IngredientFilter(filters.FilterSet):
+    """Фильтр для ингредиентов"""
+    name = filters.CharFilter(
+        lookup_expr='icontains')  # Пример фильтрации по имени
+
+    class Meta:
+        model = Ingredient
+        fields = ['name']  # Добавьте поля, по которым нужно фильтровать
