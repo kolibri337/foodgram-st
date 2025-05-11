@@ -18,12 +18,10 @@ COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Копируем проект
-COPY . /foodgramAPI/
+COPY . .
 
 # Указываем порт
 EXPOSE 8000
 
-# Запускаем сервер
+# Команда gunicorn
 CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]
-
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

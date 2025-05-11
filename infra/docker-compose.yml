@@ -19,6 +19,8 @@ services:
       - ../docs/:/usr/share/nginx/html/api/docs/
       - mediavol:/var/html/media/
       - staticvol:/var/html/static/
+    networks:
+      - foodgram_net
 
   # API
   backend:
@@ -41,15 +43,15 @@ services:
     ports:
       - 8000:8000
     networks:
-      - foodgram_network
+      - foodgram_net
     volumes:
-      - media_volume:/app/media/
-      - static_volume:/app/static/
+      - mediavol:/app/media/
+      - staticvol:/app/static/
 
    # база данных для рецептов
   db:
     container_name: foodgram-recipe-app
-    image: 16-alpine 
+    image: postgres:16-alpine
     ports:
       - 5432:5432
     environment:
@@ -59,7 +61,7 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
-      - foodgram_network
+      - foodgram_net
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
       interval: 5s
