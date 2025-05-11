@@ -6,24 +6,14 @@ on:
   pull_request:
     branches: [ "main", "master" ]
 
-# Не забудьте указать эти переменные окружения
 env:
   DOCKER_IMAGE_NAME_BACKEND: infra-backend
   DOCKER_IMAGE_NAME_FRONTEND: infra-frontend
   DOCKER_HUB_REPO: # репозиторий с образами контейнера для бекэнда
   FRONTEND_DOCKER_HUB_REPO: # репозиторий с образами контейнера для фронтенда
 
-# А также проверьте, указали ли корректно секреты
-# DOCKER_HUB_USERNAME - login на Docker Hub
-# DOCKER_HUB_PASSWORD - пароль на Docker Hub
-# SERVER_HOST - IP или домен сервера
-# SERVER_USER - пользователь на сервере
-# SERVER_PASSWORD - паррль для ssh-подключения
-# SERVER_PORT - порт на сервере
-
 jobs:
   build-and-test:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -35,10 +25,18 @@ jobs:
       with:
         python-version: '3.12'
 
+    - name: Set up Docker
+      uses: docker/setup-qemu-action@v2
+      uses: docker/setup-buildx-action@v2
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}
+        password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+
     - name: Check Docker and Compose versions
       run: |
         docker --version
-        docker-compose --version
+        docker compose version
 
     - name: Install Python dependencies
       run: |
@@ -65,15 +63,12 @@ jobs:
     - name: Build Docker images
       run: |
         cd infra
-        docker-compose build
+        docker compose build
 
     - name: Login to Docker Hub
       if: github.event_name == 'push'
       run: |
         echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
-      env:
-        DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
-        DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
     - name: Tag Docker images for Docker Hub
       run: |
@@ -96,6 +91,6 @@ jobs:
         port: ${{ secrets.SERVER_PORT }}
         script: |
           cd /home/${{ secrets.SERVER_USER }}/foodgram
-          docker-compose down
-          docker-compose pull
-          docker-compose up -d
+          docker compose down
+          docker compose pull
+          docker compose up -d
