@@ -1,0 +1,97 @@
+name: Django CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+env:
+  DOCKER_IMAGE_NAME_BACKEND: foodgram-backend
+  DOCKER_IMAGE_NAME_FRONTEND: foodgram-frontend
+  DOCKER_HUB_REPO: your-dockerhub-username/$DOCKER_IMAGE_NAME_BACKEND
+  FRONTEND_DOCKER_HUB_REPO: your-dockerhub-username/$DOCKER_IMAGE_NAME_FRONTEND
+
+jobs:
+  build-and-test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y docker.io docker-compose rsync
+
+    - name: Check Docker and Compose versions
+      run: |
+        docker --version
+        docker-compose --version
+
+    - name: Install Python dependencies
+      run: |
+        pip install --upgrade pip
+        pip install flake8 pylint
+
+    - name: Install backend requirements
+      run: |
+        pip install -r backend/requirements.txt
+
+    - name: PEP8 check (flake8)
+      run: |
+        flake8 backend/foodgramAPI --exclude=migrations --max-line-length=88 --ignore=E203,W503
+
+    - name: PyLint check (backend)
+      run: |
+        pylint backend/foodgramAPI/*.py backend/foodgramAPI/**/*.py || exit 0
+
+    - name: Run Django tests
+      run: |
+        cd backend
+        python manage.py test
+
+    - name: Build Docker images
+      run: |
+        cd infra
+        docker-compose build
+
+    - name: Login to Docker Hub
+      if: github.event_name == 'push'
+      run: |
+        echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+      env:
+        DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+        DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
+
+    - name: Tag Docker images for Docker Hub
+      run: |
+        docker tag $DOCKER_IMAGE_NAME_BACKEND $DOCKER_HUB_REPO
+        docker tag $DOCKER_IMAGE_NAME_FRONTEND $FRONTEND_DOCKER_HUB_REPO
+
+    - name: Push Docker images to Docker Hub
+      if: github.event_name == 'push'
+      run: |
+        docker push $DOCKER_HUB_REPO
+        docker push $FRONTEND_DOCKER_HUB_REPO
+
+    - name: Deploy to server via SSH
+      if: github.event_name == 'push'
+      uses: appleboy/ssh-action@v0.1.7
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        password: ${{ secrets.SERVER_PASSWORD }}
+        port: ${{ secrets.SERVER_PORT }}
+        script: |
+          cd /home/deploy/foodgram
+          docker-compose down
+          docker-compose pull
+          docker-compose up -d
