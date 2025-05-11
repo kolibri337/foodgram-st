@@ -5,14 +5,14 @@ from django.utils.translation import gettext_lazy as _
 class AccountManager(BaseUserManager):
     """Кастомный менеджер для работы с пользовательскими аккаунтами"""
 
-    def create_account(self, email, username, password=None, **extra):
+    def create_user(self, email, username, password=None, **extra):
         """Создание обычного пользовательского аккаунта"""
         extra.setdefault('is_active', True)
         extra.setdefault('is_staff', False)
         extra.setdefault('is_superuser', False)
         return self._create_account(email, username, password, **extra)
 
-    def create_superaccount(self, email, username, password, **extra):
+    def create_superuser(self, email, username, password, **extra):
         """Создание административного аккаунта"""
         extra.update({
             'is_active': True,

@@ -144,7 +144,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = (
+        fields = [
             'id',
             'author',
             'name',
@@ -153,7 +153,8 @@ class RecipeReadSerializer(serializers.ModelSerializer):
             'cooking_time',
             'is_favorite',
             'is_in_shopping_cart',
-            'recipe_ingredients')
+            'ingredients'
+        ]
 
     def get_is_favorite(self, obj):
         user = self.context.get('request').user

@@ -4,7 +4,7 @@ from django.core.files.base import ContentFile
 from django.contrib.auth.hashers import check_password
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 import base64
@@ -51,6 +51,11 @@ class UserAccountViewSet(viewsets.ModelViewSet):
     pagination_class = AccountPagination
     serializer_class = UserSerializer
 
+    def get_permissions(self):
+        if self.action == 'create':
+            return [AllowAny()]
+        return [IsAuthenticated()]
+    
     def get_serializer_class(self):
         """Выбор сериализатора в зависимости от действия"""
         return UserCreateSerializer if self.action == 'create' else super().get_serializer_class()
