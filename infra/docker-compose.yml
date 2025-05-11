@@ -33,12 +33,12 @@ services:
         condition: service_healthy
     environment:
       DEBUG: ${DEBUG}
-      SECRET_KEY: ${SECR_KEY}
-      DB_PORT: ${DatBas_PORT}
-      DB_HOST: ${DastBas_HOST}
-      DB_NAME: ${DatBas_NAME}
-      DB_USER: ${DatBas_USER}
-      DB_PASSWORD: ${DatBas_PASSWORD}
+      SECRET_KEY: ${SECRET_KEY}
+      DB_PORT: ${DB_PORT}
+      DB_HOST: ${DB_HOST}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
     restart: always
     ports:
       - 8000:8000
