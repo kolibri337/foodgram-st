@@ -11,6 +11,7 @@ from django.core.files import File
 
 User = get_user_model()
 
+
 def get_base64_image():
     image = Image.new('RGB', (100, 100))
     tmp_file = tempfile.NamedTemporaryFile(suffix='.jpg')
@@ -30,13 +31,14 @@ class RecipeAPITestCase(APITestCase):
         self.token = Token.objects.create(user=self.user)
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
 
-        self.ingredient = Ingredient.objects.create(name="Соль", measurement_unit="г")
-    
+        self.ingredient = Ingredient.objects.create(
+            name="Соль", measurement_unit="г")
+
         image = Image.new('RGB', (100, 100))
         tmp_file = tempfile.NamedTemporaryFile(suffix='.jpg')
         image.save(tmp_file, 'jpeg')
         tmp_file.seek(0)
-    
+
         self.recipe = Recipe.objects.create(
             author=self.user,
             name="Тестовый рецепт",
@@ -45,8 +47,11 @@ class RecipeAPITestCase(APITestCase):
         )
         self.recipe.image.save('test.jpg', File(tmp_file))
         tmp_file.close()
-    
-        RecipeIngredient.objects.create(recipe=self.recipe, ingredient=self.ingredient, amount=100)
+
+        RecipeIngredient.objects.create(
+            recipe=self.recipe,
+            ingredient=self.ingredient,
+            amount=100)
 
     def test_add_to_favorite(self):
         url = f"/api/recipes/{self.recipe.id}/add-to-favorites/"

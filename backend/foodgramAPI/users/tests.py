@@ -11,6 +11,7 @@ import uuid
 
 User = get_user_model()
 
+
 def get_base64_image():
     """Создание временного изображения в формате Base64"""
     image = Image.new('RGB', (100, 100))
@@ -19,6 +20,7 @@ def get_base64_image():
     tmp_file.seek(0)
     encoded_string = base64.b64encode(tmp_file.read()).decode('utf-8')
     return f"data:image/jpeg;base64,{encoded_string}"
+
 
 class SubscriptionTests(APITestCase):
     def setUp(self):
@@ -60,7 +62,8 @@ class ImageUploadTests(TestCase):
         url = "/api/users/me/avatar/"
         image_data = get_base64_image()
         data = {'avatar': image_data}
-        response = self.client.put(url, data, format='json')  # Формат JSON для Base64
+        response = self.client.put(
+            url, data, format='json')  # Формат JSON для Base64
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 

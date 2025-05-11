@@ -55,7 +55,7 @@ class UserAccountViewSet(viewsets.ModelViewSet):
         if self.action == 'create':
             return [AllowAny()]
         return [IsAuthenticated()]
-    
+
     def get_serializer_class(self):
         """Выбор сериализатора в зависимости от действия"""
         return UserCreateSerializer if self.action == 'create' else super().get_serializer_class()

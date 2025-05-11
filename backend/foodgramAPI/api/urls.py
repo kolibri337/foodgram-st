@@ -20,4 +20,3 @@ urlpatterns = [
     path('users/', UserAccountViewSet.as_view({'get': 'list', 'post': 'create'}), name='user-list'),
     path('', include(router.urls)),
 ]
-
