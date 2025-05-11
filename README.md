@@ -7,7 +7,7 @@
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![Django](https://img.shields.io/badge/Django-4.2-brightgreen)
 ![Django REST](https://img.shields.io/badge/Django_REST-3.14-red)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)
 ![Nginx](https://img.shields.io/badge/Nginx-1.25-green)
 ![Docker](https://img.shields.io/badge/Docker-26.1-blue)
 
