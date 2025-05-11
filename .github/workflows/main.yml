@@ -6,11 +6,20 @@ on:
   pull_request:
     branches: [ "main", "master" ]
 
+# Не забудьте указать эти переменные окружения
 env:
-  DOCKER_IMAGE_NAME_BACKEND: foodgram-backend
-  DOCKER_IMAGE_NAME_FRONTEND: foodgram-frontend
-  DOCKER_HUB_REPO: your-dockerhub-username/$DOCKER_IMAGE_NAME_BACKEND
-  FRONTEND_DOCKER_HUB_REPO: your-dockerhub-username/$DOCKER_IMAGE_NAME_FRONTEND
+  DOCKER_IMAGE_NAME_BACKEND: infra-backend
+  DOCKER_IMAGE_NAME_FRONTEND: infra-frontend
+  DOCKER_HUB_REPO: # репозиторий с образами контейнера для бекэнда
+  FRONTEND_DOCKER_HUB_REPO: # репозиторий с образами контейнера для фронтенда
+
+# А также проверьте, указали ли корректно секреты
+# DOCKER_HUB_USERNAME - login на Docker Hub
+# DOCKER_HUB_PASSWORD - пароль на Docker Hub
+# SERVER_HOST - IP или домен сервера
+# SERVER_USER - пользователь на сервере
+# SERVER_PASSWORD - паррль для ssh-подключения
+# SERVER_PORT - порт на сервере
 
 jobs:
   build-and-test:
@@ -55,7 +64,7 @@ jobs:
 
     - name: Run Django tests
       run: |
-        cd backend
+        cd backend/foodgramAPI
         python manage.py test
 
     - name: Build Docker images
@@ -91,7 +100,7 @@ jobs:
         password: ${{ secrets.SERVER_PASSWORD }}
         port: ${{ secrets.SERVER_PORT }}
         script: |
-          cd /home/deploy/foodgram
+          cd /home/${{ secrets.SERVER_USER }}/foodgram
           docker-compose down
           docker-compose pull
           docker-compose up -d
