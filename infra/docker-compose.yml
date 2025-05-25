@@ -8,6 +8,7 @@ services:
       - ../frontend/:/app/result_build/
     networks:
       - foodgram_net
+
   nginx:
     container_name: foodgram-proxy
     image: nginx:1.25.4-alpine
@@ -17,12 +18,13 @@ services:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - ../frontend/build:/usr/share/nginx/html/
       - ../docs/:/usr/share/nginx/html/api/docs/
-      - mediavol:/var/html/media/
-      - staticvol:/var/html/static/
+      - mediavol:/usr/share/nginx/html/media/
+      - staticvol:/usr/share/nginx/html/static/
+    depends_on:
+      - backend
     networks:
       - foodgram_net
 
-  # API
   backend:
     container_name: foodgram-backend
     build:
@@ -35,7 +37,7 @@ services:
       DEBUG: ${DEBUG}
       SECRET_KEY: ${SECRET_KEY}
       DB_PORT: ${DB_PORT}
-      DB_HOST: ${DB_HOST}
+      DB_HOST: db
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
@@ -48,7 +50,6 @@ services:
       - mediavol:/app/media/
       - staticvol:/app/static/
 
-   # база данных для рецептов
   db:
     container_name: foodgram-recipe-app
     image: postgres:16-alpine
@@ -67,7 +68,6 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
-
 
 networks:
   foodgram_net:

@@ -30,8 +30,9 @@ class ImageDataField(serializers.Field):
                 raise serializers.ValidationError(
                     "Формат изображения не поддерживается")
             data = ContentFile(
-                base64.b64decode(imgstr), name=f"{
-                    uuid.uuid4()}.{ext}")
+                base64.b64decode(imgstr),
+                name=f"{uuid.uuid4()}.{ext}"
+            )
             return data
 
         raise serializers.ValidationError("Некорректный формат изображения")
